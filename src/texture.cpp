@@ -13,6 +13,7 @@ Texture::Texture(int width, int height, glm::u8vec3 *data)
 {
 	_width = width;
 	_height = height;
+
 	glGenTextures(1, &_texture);
 	glBindTexture(GL_TEXTURE_2D, _texture);
 

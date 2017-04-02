@@ -120,6 +120,12 @@ void Shader::Uniform1i(const char * name, GLint value)
 	glUniform1i(uniform, value);
 }
 
+void Shader::UniformMatrix4fv(const char * name, glm::mat4 value)
+{
+	GLint uniform = GetUniform(name);
+	glUniformMatrix4fv(uniform, 1, GL_FALSE, (GLfloat *)&value);
+}
+
 void Shader::Use()
 {
 	glUseProgram(_program_shader);

@@ -3,7 +3,8 @@
 #include <string>
 #include <map>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 
 class Shader
 {
@@ -14,6 +15,7 @@ public:
 
 	GLint GetUniform(std::string name);
 	void Uniform1i(const char *name, GLint value);
+	void Shader::UniformMatrix4fv(const char * name, glm::mat4 value);
 	void Use();
 	GLint ID();
 private:

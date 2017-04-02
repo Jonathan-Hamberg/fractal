@@ -13,6 +13,8 @@ set ( SOURCE
     src/glad/glad.c
     src/shader.cpp
     src/texture.cpp
+    src/mandlebrot.cpp
+    src/util.cpp
     src/gui.cpp )
     
 add_executable ( fractal ${SOURCE} )

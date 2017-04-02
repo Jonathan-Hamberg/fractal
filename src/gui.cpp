@@ -4,14 +4,17 @@
 #include <glm/glm.hpp>
 #include "imgui.h"
 
+#include "util.h"
 #include "glType.h"
 #include "shader.h"
 #include "texture.h"
+#include "mandlebrot.h"
 #include "gui.h"
 
 GLuint VAO, VBO, EBO;
 Shader default_shader;
 std::vector<glm::u8vec3> texture_data;
+std::vector<uint8_t> step_data;
 Texture texture;
 
 
@@ -21,25 +24,29 @@ void gui_init()
 	default_shader = Shader("shader/default");
 
 	// Allocate memory for the texture.
-	texture_data.resize(100*100);
+	texture_data.resize(400 * 400);
+	step_data.resize(400 * 400);
 
 	// Assign random numbers to the texture data.
-	for (int i = 0; i < 100 * 100; i++)
+	for (int i = 0; i < 400 * 400; i++)
 	{
 		texture_data[i] = glm::vec3(rand() % 255, rand() % 255, rand() % 255);
 	}
 
-	texture = Texture(100, 100, texture_data.data());
+	render_mandlebrot(step_data, 400, 400, -2, -2, 2, 2);
+	color_mandlebrot(step_data, texture_data);
+
+	texture = Texture(400, 400, texture_data.data());
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 	VertexPos2Tex2 vertices[] = {
-		{ 0.5f,  0.5f,  1.0f, 1.0f },   // Top Right
-		{ 0.5f, -0.5f,  1.0f, 0.0f },   // Bottom Right
-		{ -0.5f, -0.5f,  0.0f, 0.0f },   // Bottom Left
-		{ -0.5f,  0.5f,  0.0f, 1.0f }    // Top Left 
+		{ 1.0f,  1.0f,  1.0f, 1.0f },   // Top Right
+		{ 1.0f, -1.0f,  1.0f, 0.0f },   // Bottom Right
+		{ -1.0f, -1.0f,  0.0f, 0.0f },   // Bottom Left
+		{ -1.0f,  1.0f,  0.0f, 1.0f }    // Top Left 
 	};
 
 	GLuint indices[] = {  // Note that we start from 0!
@@ -68,8 +75,6 @@ void gui_init()
 
 void gui_main(GLFWwindow *window)
 {
-
-
 	// Get the screen size.
 	int windowWidth, windowHeight;
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -87,6 +92,13 @@ void gui_main(GLFWwindow *window)
 		ImGui::EndMainMenuBar();
 	}
 
+	default_shader.Use();
+	// Calculate the upper coordinate for the transform.  This new upper coordinate is to avoid rendering over the menubar.
+	float y2 = 1 - (19.0f * 2 / windowHeight);
+	glm::mat4 transform = linear_transform(-1, 1, -1, 1, // Input coordinate system.
+		-1, 1, -1, y2); // Output coordinate system.
+	
+	default_shader.UniformMatrix4fv("transform", transform);
 
 
 	glBindVertexArray(VAO);
