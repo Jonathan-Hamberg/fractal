@@ -12,6 +12,7 @@ set ( SOURCE
     src/imgui_impl_glfw_gl3.cpp
     src/glad/glad.c
     src/shader.cpp
+    src/texture.cpp
     src/gui.cpp )
     
 add_executable ( fractal ${SOURCE} )

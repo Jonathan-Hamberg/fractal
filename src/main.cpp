@@ -17,6 +17,11 @@ void glfw_error_callback(int error, const char *description)
     std::cout << "error code: " << error << " " << description << std::endl;
 }
 
+void glfw_resize_callback(GLFWwindow *window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
 int main(int argv, char *argc[])
 {
 	// Initialize glfw.
@@ -39,6 +44,9 @@ int main(int argv, char *argc[])
 
 	// Make the OpenGL context current.
     glfwMakeContextCurrent(window);
+
+	// Set the GLFW callbacks.
+	glfwSetFramebufferSizeCallback(window, glfw_resize_callback);
 
 	// Initialize the OpenGL functions.
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))

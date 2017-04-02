@@ -92,7 +92,40 @@ Shader::~Shader()
 
 }
 
+GLint Shader::GetUniform(std::string name)
+{
+	if (uniform_map.count(name))
+	{
+		return uniform_map[name];
+	}
+	else
+	{
+		GLint uniform = glGetUniformLocation(_program_shader, name.c_str());
+		if (uniform != -1)
+		{
+			uniform_map[name] = uniform;
+		}
+		else
+		{
+			std::cout << "ERROR:SHADER:UNIFORM:NOTFOUND\n" << name << std::endl;
+		}
+
+		return uniform;
+	}
+}
+
+void Shader::Uniform1i(const char * name, GLint value)
+{
+	GLint uniform = GetUniform(name);
+	glUniform1i(uniform, value);
+}
+
 void Shader::Use()
 {
 	glUseProgram(_program_shader);
+}
+
+GLint Shader::ID()
+{
+	return _program_shader;
 }
