@@ -15,7 +15,7 @@ public:
 
 	GLint GetUniform(std::string name);
 	void Uniform1i(const char *name, GLint value);
-	void Shader::UniformMatrix4fv(const char * name, glm::mat4 value);
+	void UniformMatrix4fv(const char * name, glm::mat4 value);
 	void Use();
 	GLint ID();
 private:

@@ -1,9 +1,19 @@
+macro(symlink filepath sympath)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/res/shader ${CMAKE_SOURCE_DIR}/bin/shader )
+    message( STATUS "Created symlink: ${sympath} -> ${filepath}" )
+endmacro(symlink)
+
 cmake_minimum_required ( VERSION 3.3 )
+
 project( fractal )
 
 set (CMAKE_CXX_STANDARD 11)
 
 include_directories ( ${CMAKE_SOURCE_DIR}/src/ )
+
+set( EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" )
+
+symlink("${CMAKE_SOURCE_DIR}/res/shader" "${CMAKE_SOURCE_DIR}/bin/shader" )
 
 set ( SOURCE
     src/main.cpp
@@ -23,6 +33,7 @@ if(WIN32)
 	file( COPY ${CMAKE_SOURCE_DIR}/lib/glfw3.dll DESTINATION ${CMAKE_SOURCE_DIR}/bin/ )
 	target_link_libraries( fractal ${CMAKE_SOURCE_DIR}/lib/glfw3dll.lib )
 else(WIN32)
+        find_package(glfw3 3.1 REQUIRED)
 	target_link_libraries( fractal ${GLFW3_LIBRARY} dl X11 Xrandr Xi pthread Xinerama Xcursor )
 endif(WIN32)	
 

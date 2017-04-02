@@ -1,10 +1,10 @@
-Cmpiling on Linux
-	sudo apt install libgtk-3-dev libglfw3-dev
+Compiling on Linux
+    sudo apt install libglfw3-dev
+    mkdir build && cd build
+    cmake ..
+    make
 
-Only 64 bit version supported.
 
-	mkdir build && cd build
-	cmake .. -G"Visual Studio 15 2017 Win64"
-	make
-		
-Use apitrace to debug OpenGL part of the application.
+Compiling on Windows
+    mkdir build && cd build
+    cmake .. -G"Visual Studio 15 2017 Win64" // Any recent version of Visual studio should work.  Must be 64 bit!
