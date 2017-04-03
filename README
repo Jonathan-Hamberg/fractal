@@ -1,9 +1,10 @@
+General Notes
+    The executable must be in the same directory as the res directory.
 Compiling on Linux
     sudo apt install libglfw3-dev
     mkdir build && cd build
     cmake ..
     make
-
 
 Compiling on Windows
     mkdir build && cd build

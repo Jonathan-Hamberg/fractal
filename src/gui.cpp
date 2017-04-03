@@ -21,7 +21,7 @@ Texture texture;
 void gui_init()
 {
 	// Load the shader for rendering.
-	default_shader = Shader("shader/default");
+	default_shader = Shader("res/shader/default");
 
 	// Allocate memory for the texture.
 	texture_data.resize(400 * 400);
