@@ -56,7 +56,9 @@ int main(int argv, char *argc[])
 	}
 
     ImGui_ImplGlfwGL3_Init(window, true);
-	gui_init();
+
+	GameData game_data;
+	gui_init(game_data);
 
     while (!glfwWindowShouldClose(window))
 	{
@@ -65,11 +67,12 @@ int main(int argv, char *argc[])
 
         glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-		gui_main(window);
+		gui_main(window, game_data);
         ImGui::Render();
 
         glfwSwapBuffers(window);
     }
 
+	gui_shutdown(game_data);
     glfwTerminate();
 }

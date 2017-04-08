@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "imgui.h"
 
@@ -11,36 +13,14 @@
 #include "mandlebrot.h"
 #include "gui.h"
 
-GLuint VAO, VBO, EBO;
-Shader default_shader;
-std::vector<glm::u8vec3> texture_data;
-std::vector<uint8_t> step_data;
-Texture texture;
-
-
-void gui_init()
+void gui_init(GameData &data)
 {
 	// Load the shader for rendering.
-	default_shader = Shader("res/shader/default");
+	data.default_shader = Shader("res/shader/default");
 
-	// Allocate memory for the texture.
-	texture_data.resize(400 * 400);
-	step_data.resize(400 * 400);
-
-	// Assign random numbers to the texture data.
-	for (int i = 0; i < 400 * 400; i++)
-	{
-		texture_data[i] = glm::vec3(rand() % 255, rand() % 255, rand() % 255);
-	}
-
-	render_mandlebrot(step_data, 400, 400, -2, -2, 2, 2);
-	color_mandlebrot(step_data, texture_data);
-
-	texture = Texture(400, 400, texture_data.data());
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	glGenVertexArrays(1, &data.VAO);
+	glGenBuffers(1, &data.VBO);
+	glGenBuffers(1, &data.EBO);
 
 	VertexPos2Tex2 vertices[] = {
 		{ 1.0f,  1.0f,  1.0f, 1.0f },   // Top Right
@@ -54,30 +34,26 @@ void gui_init()
 		1, 2, 3    // Second Triangle
 	};
 
-	glBindVertexArray(VAO);
-	// Send the verticies to the GPU.
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindVertexArray(data.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, data.VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	VertexPos2Tex2::VertexAttrib();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture.ID());
-	glUniform1i(glGetUniformLocation(default_shader.ID(), "testing"), 0);
-
-	default_shader.Use();
-
+		VertexPos2Tex2::VertexAttrib();
 	glBindVertexArray(0);
 }
 
-void gui_main(GLFWwindow *window)
+void gui_main(GLFWwindow *window, GameData &data)
 {
 	// Get the screen size.
 	int windowWidth, windowHeight;
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+	data.renderTime = 0.0;
+	data.iterations = 128;
+	data.render_scale = 1;
 
 	// Set up the main menu for the application.
 	if (ImGui::BeginMainMenuBar())
@@ -92,16 +68,58 @@ void gui_main(GLFWwindow *window)
 		ImGui::EndMainMenuBar();
 	}
 
-	default_shader.Use();
+	static bool settings = true;
+	ImGui::SetWindowPos(ImVec2(0.0f, 19.0f));
+	ImGui::SetWindowSize(ImVec2(150.0f, windowHeight - 19.0f));
+	if (ImGui::Begin("Settings", &settings, 0))
+	{
+		ImGui::LabelText("time", "%1.3f", data.renderTime);
+
+		ImGui::InputInt("iter", &data.iterations);
+		data.iterations = data.iterations < 0 ? 0 : data.iterations;
+		data.iterations = data.iterations > 255 ? 255 : data.iterations;
+
+		ImGui::InputInt("scale", &data.render_scale);
+		data.render_scale = data.render_scale < 1 ? 1 : data.render_scale;
+		data.render_scale = data.render_scale > 16 ? 16 : data.render_scale;
+	}
+	ImGui::End();
+
+	data.default_shader.Use();
+
+	int fwidth = windowWidth, fheight = windowHeight - 19;
+	fwidth /= data.render_scale;
+	fheight /= data.render_scale;
+
+	// Allocate memory for the texture.
+	if (data.texture_data.size() != fwidth*fheight)
+	{
+		data.texture_data.resize(fwidth * fheight);
+		data.step_data.resize(fwidth * fheight);
+
+		data.renderTime = glfwGetTime();
+		render_mandlebrot(data.step_data, fwidth, fheight, -2, -2, 2, 2, data.iterations);
+		color_mandlebrot(data.step_data, data.texture_data, data.iterations);
+		data.renderTime = glfwGetTime() - data.renderTime;
+
+		data.texture_fractal.UpdateData(data.texture_data.data(), fwidth, fheight);
+	}
+
+
 	// Calculate the upper coordinate for the transform.  This new upper coordinate is to avoid rendering over the menubar.
 	float y2 = 1 - (19.0f * 2 / windowHeight);
 	glm::mat4 transform = linear_transform(-1, 1, -1, 1, // Input coordinate system.
 		-1, 1, -1, y2); // Output coordinate system.
 	
-	default_shader.UniformMatrix4fv("transform", transform);
+	data.default_shader.UniformMatrix4fv("transform", transform);
 
-
-	glBindVertexArray(VAO);
+	glBindTexture(GL_TEXTURE_2D, data.texture_fractal.ID());
+	glBindVertexArray(data.VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+void gui_shutdown(GameData &data)
+{
+
 }

@@ -1,4 +1,4 @@
-#include <vector>
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -10,7 +10,9 @@ public:
 	~Texture();
 
 	GLint ID();
-	void UpdateData(glm::u8vec3 *data);
+	int Width();
+	int Height();
+	void UpdateData(glm::u8vec3 *data, int width, int height);
 private:
 	unsigned _texture;
 	int _width;
