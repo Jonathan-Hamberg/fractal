@@ -18,6 +18,13 @@ void gui_init(GameData &data)
 	// Load the shader for rendering.
 	data.default_shader = Shader("res/shader/default");
 
+	data.renderTime = 0.0;
+	data.iterations = 128;
+	data.render_scale = 1;
+
+	data.view_region = View(-2, 2, 2, -2);
+	data.update_render = false;
+
 	glGenVertexArrays(1, &data.VAO);
 	glGenBuffers(1, &data.VBO);
 	glGenBuffers(1, &data.EBO);
@@ -51,10 +58,6 @@ void gui_main(GLFWwindow *window, GameData &data)
 	int windowWidth, windowHeight;
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-	data.renderTime = 0.0;
-	data.iterations = 128;
-	data.render_scale = 1;
-
 	// Set up the main menu for the application.
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -82,6 +85,7 @@ void gui_main(GLFWwindow *window, GameData &data)
 		ImGui::InputInt("scale", &data.render_scale);
 		data.render_scale = data.render_scale < 1 ? 1 : data.render_scale;
 		data.render_scale = data.render_scale > 16 ? 16 : data.render_scale;
+
 	}
 	ImGui::End();
 
@@ -91,24 +95,48 @@ void gui_main(GLFWwindow *window, GameData &data)
 	fwidth /= data.render_scale;
 	fheight /= data.render_scale;
 
+
+
+	float centerX = data.view_region.GetX() + ((float)ImGui::GetMousePos().x / windowWidth) * data.view_region.GetWidth();
+	float centerY = data.view_region.GetY() + ((ImGui::GetMousePos().y - 19.0f) / (windowHeight - 19.0f)) * data.view_region.GetHeight();
+
+	if (ImGui::IsMouseClicked(0, false))
+	{
+		data.view_region.SetCenter(centerX, centerY);
+		data.view_region.Zoom(2.0f);
+
+		data.update_render = true;
+	}
+
+	if (ImGui::IsMouseClicked(1))
+	{
+		data.view_region.SetCenter(centerX, centerY);
+		data.view_region.Zoom(0.5f);
+		
+		data.update_render = true;
+	}
+	
+
 	// Allocate memory for the texture.
-	if (data.texture_data.size() != fwidth*fheight)
+	if (data.texture_data.size() != fwidth*fheight || data.update_render)
 	{
 		data.texture_data.resize(fwidth * fheight);
 		data.step_data.resize(fwidth * fheight);
 
 		data.renderTime = glfwGetTime();
-		render_mandlebrot(data.step_data, fwidth, fheight, -2, -2, 2, 2, data.iterations);
+		render_mandlebrot(data.step_data, fwidth, fheight, data.view_region, data.iterations);
 		color_mandlebrot(data.step_data, data.texture_data, data.iterations);
 		data.renderTime = glfwGetTime() - data.renderTime;
 
 		data.texture_fractal.UpdateData(data.texture_data.data(), fwidth, fheight);
+
+		data.update_render = false;
 	}
 
 
 	// Calculate the upper coordinate for the transform.  This new upper coordinate is to avoid rendering over the menubar.
 	float y2 = 1 - (19.0f * 2 / windowHeight);
-	glm::mat4 transform = linear_transform(-1, 1, -1, 1, // Input coordinate system.
+	glm::mat4 transform = linear_transform(-1, 1, 1, -1, // Input coordinate system.
 		-1, 1, -1, y2); // Output coordinate system.
 	
 	data.default_shader.UniformMatrix4fv("transform", transform);

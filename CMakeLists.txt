@@ -27,6 +27,7 @@ set ( SOURCE
     src/texture.cpp
     src/mandlebrot.cpp
     src/util.cpp
+    src/view.cpp
     src/gui.cpp )
 
 add_executable ( fractal ${SOURCE} )
