@@ -1,28 +1,28 @@
 #pragma once
 
-class View
+class view
 {
 public:
-	View();
-	View(float x1, float y1, float x2, float y2);
+	view();
+	view(double x1, double y1, double x2, double y2);
 	
-	void Zoom(float scale);
-	void Translate(float x, float y);
+	void Zoom(double scale);
+	void Translate(double x, double y);
 
-	void SetCenter(float x, float y);
+	void SetCenter(double x, double y);
 
-	float GetX();
-	float GetY();
-	float GetWidth();
-	float GetHeight();
+	double GetX();
+	double GetY();
+	double GetWidth();
+	double GetHeight();
 
-	float GetX1();
-	float GetY1();
-	float GetX2();
-	float GetY2();
+	double GetX1();
+	double GetY1();
+	double GetX2();
+	double GetY2();
 	
-	float GetCenterX();
-	float GetCenterY();
+	double GetCenterX();
+	double GetCenterY();
 private:
-	float _x1, _y1, _x2, _y2;
+	double _x1, _y1, _x2, _y2;
 };

@@ -18,7 +18,7 @@ struct GameData
 	GLuint VAO, VBO, EBO;
 	std::vector<glm::u8vec3> texture_data;
 	std::vector<uint8_t> step_data;
-	View view_region;
+	view view_region;
 	bool update_render;
 
 	// User Interface Data.

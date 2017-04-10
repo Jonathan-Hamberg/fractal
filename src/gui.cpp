@@ -22,7 +22,7 @@ void gui_init(GameData &data)
 	data.iterations = 128;
 	data.render_scale = 1;
 
-	data.view_region = View(-2, 2, 2, -2);
+	data.view_region = view(-2, 2, 2, -2);
 	data.update_render = false;
 
 	glGenVertexArrays(1, &data.VAO);
@@ -86,6 +86,9 @@ void gui_main(GLFWwindow *window, GameData &data)
 		data.render_scale = data.render_scale < 1 ? 1 : data.render_scale;
 		data.render_scale = data.render_scale > 16 ? 16 : data.render_scale;
 
+		double power = std::log10(4 / data.view_region.GetWidth());
+		ImGui::LabelText("zoom", "10^%1.0f", power);
+
 	}
 	ImGui::End();
 
@@ -97,13 +100,13 @@ void gui_main(GLFWwindow *window, GameData &data)
 
 
 
-	float centerX = data.view_region.GetX() + ((float)ImGui::GetMousePos().x / windowWidth) * data.view_region.GetWidth();
-	float centerY = data.view_region.GetY() + ((ImGui::GetMousePos().y - 19.0f) / (windowHeight - 19.0f)) * data.view_region.GetHeight();
+	double centerX = data.view_region.GetX() + ((double)ImGui::GetMousePos().x / windowWidth) * data.view_region.GetWidth();
+	double centerY = data.view_region.GetY() + ((ImGui::GetMousePos().y - 19.0) / (windowHeight - 19.0)) * data.view_region.GetHeight();
 
 	if (ImGui::IsMouseClicked(0, false))
 	{
 		data.view_region.SetCenter(centerX, centerY);
-		data.view_region.Zoom(2.0f);
+		data.view_region.Zoom(2.0);
 
 		data.update_render = true;
 	}
@@ -111,8 +114,15 @@ void gui_main(GLFWwindow *window, GameData &data)
 	if (ImGui::IsMouseClicked(1))
 	{
 		data.view_region.SetCenter(centerX, centerY);
-		data.view_region.Zoom(0.5f);
+		data.view_region.Zoom(0.5);
 		
+		data.update_render = true;
+	}
+
+	if(ImGui::GetIO().KeysDown[' '])
+	{
+		data.view_region = view(-2.0, 2.0, 2.0, -2.0);
+
 		data.update_render = true;
 	}
 	

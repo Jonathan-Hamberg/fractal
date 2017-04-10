@@ -6,11 +6,14 @@
 #include "view.h"
 #include "mandlebrot.h"
 
-void render_mandlebrot(std::vector<uint8_t> &data, int width, int height, View region, int iterations)
+void render_mandlebrot(std::vector<uint8_t> &data, int width, int height, view region, int iterations)
 {
 	// Calculate the dx and ty steps.
-	float dx = region.GetWidth() / width;
-	float dy = region.GetHeight() / height;
+	double dx = region.GetWidth() / width;
+	double dy = region.GetHeight() / height;
+	double Cr, Ci, Zr, Zi, Zrt;
+
+	uint8_t *data_pointer = data.data();
 
 	// Iteratively calculatet he steps for each pixel.
 	for (int x = 0; x < width; x++)
@@ -18,19 +21,21 @@ void render_mandlebrot(std::vector<uint8_t> &data, int width, int height, View r
 		for (int y = 0; y < height; y++)
 		{
 			int i;
-			std::complex<float> C(region.GetX() + x*dx, region.GetY() + y*dy);
-			std::complex<float> Z = C;
-			float magnitude = Z.real() * Z.real() + Z.imag() * Z.imag();
+			Cr = region.GetX() + x*dx;
+			Ci = region.GetY() + y*dy;
+			Zr = Cr;
+			Zi = Ci;
 
 			// Find the number of steps to divergence.
-			for (i = 0; i < iterations && magnitude < 4; i++)
+			for (i = 0; i < iterations && Zr * Zr + Zi * Zi < 4; i++)
 			{
-				Z = Z*Z + C;
-				magnitude = Z.real() * Z.real() + Z.imag() * Z.imag();
+				Zrt = Zr; // Keep tempporary value of Zr.
+				Zr = Zr * Zr - Zi * Zi + Cr;
+				Zi = 2 * Zrt * Zi + Ci;
 			}
 
 			// Assign the steps to the data vector.
-			data[y * width + x] = i;
+			data_pointer[y * width + x] = i;
 		}
 	}
 }
@@ -43,10 +48,25 @@ void color_mandlebrot(std::vector<uint8_t> &steps, std::vector<glm::u8vec3> &col
 		return;
 	}
 
+	int N = iterations;
+	int N3 = N * N * N;
+	int n, b, nn, r, g;
+	double t;
+	uint8_t     *steps_data = steps.data();
+	glm::u8vec3 *color_data = colors.data();
+
 	for (unsigned i = 0; i < steps.size(); i++)
 	{
-		uint8_t step_count = steps[i] / iterations * 255;
-		colors[i] = glm::u8vec3(step_count, 0, step_count);
+		n = steps_data[i];
+		t = (double)n / iterations;
+		b = n / (N*N);
+		nn = n - b*N*N;
+		r = nn / N;
+		g = nn - r * N;
+
+		color_data[i].r = r;
+		color_data[i].g = g;
+		color_data[i].b = b;
 	}
 }
 

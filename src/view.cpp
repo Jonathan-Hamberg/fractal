@@ -1,6 +1,6 @@
 #include "view.h"
 
-View::View()
+view::view()
 {
 	_x1 = 0.0f;
 	_y1 = 0.0f;
@@ -8,7 +8,7 @@ View::View()
 	_y2 = 0.0f;
 }
 
-View::View(float x1, float y1, float x2, float y2)
+view::view(double x1, double y1, double x2, double y2)
 {
 	_x1 = x1;
 	_y1 = y1;
@@ -17,12 +17,12 @@ View::View(float x1, float y1, float x2, float y2)
 	
 }
 
-void View::Zoom(float scale)
+void view::Zoom(double scale)
 {
-	float centerX = (_x2 + _x1) / 2;;
-	float centerY = (_y2 + _y1) / 2;
-	float width = _x2 - _x1;
-	float height = _y2 - _y1;
+	double centerX = (_x2 + _x1) / 2;;
+	double centerY = (_y2 + _y1) / 2;
+	double width = _x2 - _x1;
+	double height = _y2 - _y1;
 
 	_x1 = centerX - width / 2 / scale;
 	_y1 = centerY + height / 2 / scale;
@@ -30,7 +30,7 @@ void View::Zoom(float scale)
 	_y2 = centerY - height / 2 / scale;
 }
 
-void View::Translate(float x, float y)
+void view::Translate(double x, double y)
 {
 	_x1 += x;
 	_y1 -= y;
@@ -38,10 +38,10 @@ void View::Translate(float x, float y)
 	_y2 -= y;
 }
 
-void View::SetCenter(float x, float y)
+void view::SetCenter(double x, double y)
 {
-	float width = _x2 - _x1;
-	float height = _y2 - _y1;
+	double width = _x2 - _x1;
+	double height = _y2 - _y1;
 
 	_x1 = x - width / 2;
 	_y1 = y + height / 2;
@@ -49,52 +49,52 @@ void View::SetCenter(float x, float y)
 	_y2 = y - height / 2;
 }
 
-float View::GetX()
+double view::GetX()
 {
 	return _x1;
 }
 
-float View::GetY()
+double view::GetY()
 {
 	return _y1;
 }
 
-float View::GetWidth()
+double view::GetWidth()
 {
 	return _x2 - _x1;
 }
 
-float View::GetHeight()
+double view::GetHeight()
 {
 	return _y2 - _y1;
 }
 
-float View::GetX1()
+double view::GetX1()
 {
 	return _x1;
 }
 
-float View::GetY1()
+double view::GetY1()
 {
 	return _y1;
 }
 
-float View::GetX2()
+double view::GetX2()
 {
 	return _x2;
 }
 
-float View::GetY2()
+double view::GetY2()
 {
 	return _y2;
 }
 
-float View::GetCenterX()
+double view::GetCenterX()
 {
 	return _x1 + (_x2 - _x1) / 2;
 }
 
-float View::GetCenterY()
+double view::GetCenterY()
 {
 	return _y1 + (_y2 - _y1) / 2;
 }
