@@ -12,6 +12,27 @@
 #include "texture.h"
 #include "mandlebrot.h"
 #include "gui.h"
+#include "fractal.h"
+
+uint32_t mandelbrot(double Re, double Im, uint32_t iterations)
+{
+	uint32_t iter;
+	double Zr, Zi, Cr, Ci, Zrt;
+	Zr = Cr = Re;
+	Zi = Ci = Im;
+
+	iter = 0;
+	while (iter < iterations && Zr * Zr + Zi*Zi < 4)
+	{
+		Zrt = Zr; // Keep tempporary value of Zr.
+		Zr = Zr * Zr - Zi * Zi + Cr;
+		Zi = 2 * Zrt * Zi + Ci;
+		++iter;
+	}
+
+	// Return the iterations.
+	return iter;
+}
 
 void gui_init(GameData &data)
 {
@@ -22,7 +43,6 @@ void gui_init(GameData &data)
 	data.iterations = 128;
 	data.render_scale = 1;
 
-	data.view_region = view(-2, 2, 2, -2);
 	data.update_render = false;
 
 	glGenVertexArrays(1, &data.VAO);
@@ -71,9 +91,13 @@ void gui_main(GLFWwindow *window, GameData &data)
 		ImGui::EndMainMenuBar();
 	}
 
+	double centerX = data.view_region.GetX() + ((double)ImGui::GetMousePos().x / windowWidth) * data.view_region.GetWidth();
+	double centerY = data.view_region.GetY() + ((ImGui::GetMousePos().y - 19.0) / (windowHeight - 19.0)) * data.view_region.GetHeight();
+
 	static bool settings = true;
 	ImGui::SetWindowPos(ImVec2(0.0f, 19.0f));
 	ImGui::SetWindowSize(ImVec2(150.0f, windowHeight - 19.0f));
+
 	if (ImGui::Begin("Settings", &settings, 0))
 	{
 		ImGui::LabelText("time", "%1.3f", data.renderTime);
@@ -89,6 +113,13 @@ void gui_main(GLFWwindow *window, GameData &data)
 		double power = std::log10(4 / data.view_region.GetWidth());
 		ImGui::LabelText("zoom", "10^%1.0f", power);
 
+		ImGui::LabelText("x", "%f", data.view_region.GetX());
+		ImGui::LabelText("y", "%f", data.view_region.GetY());
+		ImGui::LabelText("width", "%f", data.view_region.GetWidth());
+		ImGui::LabelText("height", "%f", data.view_region.GetHeight());
+		ImGui::LabelText("x", "%f", centerX);
+		ImGui::LabelText("y", "%f", centerY);
+
 	}
 	ImGui::End();
 
@@ -97,11 +128,6 @@ void gui_main(GLFWwindow *window, GameData &data)
 	int fwidth = windowWidth, fheight = windowHeight - 19;
 	fwidth /= data.render_scale;
 	fheight /= data.render_scale;
-
-
-
-	double centerX = data.view_region.GetX() + ((double)ImGui::GetMousePos().x / windowWidth) * data.view_region.GetWidth();
-	double centerY = data.view_region.GetY() + ((ImGui::GetMousePos().y - 19.0) / (windowHeight - 19.0)) * data.view_region.GetHeight();
 
 	if (ImGui::IsMouseClicked(0, false))
 	{
@@ -121,20 +147,67 @@ void gui_main(GLFWwindow *window, GameData &data)
 
 	if(ImGui::GetIO().KeysDown[' '])
 	{
-		data.view_region = view(-2.0, 2.0, 2.0, -2.0);
+		data.view_region = view(-2.0, -2.0, 4.0, 4.0);
 
 		data.update_render = true;
 	}
-	
+
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+	{
+		data.view_region.Zoom(2);
+
+		data.update_render = true;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		data.view_region.Translate(data.view_region.GetWidth() / 4, 0);
+
+		data.update_render = true;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		data.view_region.Translate(-data.view_region.GetWidth() / 4, 0);
+
+		data.update_render = true;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		data.view_region.Translate(0, data.view_region.GetHeight() / 4);
+
+		data.update_render = true;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		data.view_region.Translate(0, -data.view_region.GetHeight() / 4);
+
+		data.update_render = true;
+	}
 
 	// Allocate memory for the texture.
 	if (data.texture_data.size() != fwidth*fheight || data.update_render)
 	{
+		// Correct for the aspect ration.
+		double aspect = (double)fwidth / fheight;
+		data.view_region.SetHeight(data.view_region.GetWidth() / aspect);
+
 		data.texture_data.resize(fwidth * fheight);
 		data.step_data.resize(fwidth * fheight);
 
 		data.renderTime = glfwGetTime();
-		render_mandlebrot(data.step_data, fwidth, fheight, data.view_region, data.iterations);
+
+ 		render_full(mandelbrot,
+			data.step_data.data(),
+			{ fwidth, fheight },
+			{ data.view_region.GetX(), 
+			data.view_region.GetY(),
+			data.view_region.GetWidth(),
+			data.view_region.GetHeight()},
+			data.iterations);
+
 		color_mandlebrot(data.step_data, data.texture_data, data.iterations);
 		data.renderTime = glfwGetTime() - data.renderTime;
 

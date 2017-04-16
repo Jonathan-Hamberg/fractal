@@ -17,7 +17,7 @@ struct GameData
 	Shader default_shader;
 	GLuint VAO, VBO, EBO;
 	std::vector<glm::u8vec3> texture_data;
-	std::vector<uint8_t> step_data;
+	std::vector<uint32_t> step_data;
 	view view_region;
 	bool update_render;
 

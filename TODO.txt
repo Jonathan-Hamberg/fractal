@@ -1,0 +1,9 @@
+Add threaded system to render the fractal using all available cores.
+Add dynamic system using function pointers to render the fractal.
+Add bit bliting code to copy rendered code in thread to the master image.
+Add code to zoom in by 2x by rendering in between previous pixels.
+Add anti-aliasing to increase image quality.
+Add aspect ratio correction.
+
+Multithreading System
+    Break the code into n segments with width and height.

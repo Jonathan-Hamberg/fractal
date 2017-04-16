@@ -40,7 +40,7 @@ void render_mandlebrot(std::vector<uint8_t> &data, int width, int height, view r
 	}
 }
 
-void color_mandlebrot(std::vector<uint8_t> &steps, std::vector<glm::u8vec3> &colors, int iterations)
+void color_mandlebrot(std::vector<uint32_t> &steps, std::vector<glm::u8vec3> &colors, int iterations)
 {
 	if (steps.size() != colors.size())
 	{
@@ -52,7 +52,7 @@ void color_mandlebrot(std::vector<uint8_t> &steps, std::vector<glm::u8vec3> &col
 	int N3 = N * N * N;
 	int n, b, nn, r, g;
 	double t;
-	uint8_t     *steps_data = steps.data();
+	uint32_t     *steps_data = steps.data();
 	glm::u8vec3 *color_data = colors.data();
 
 	for (unsigned i = 0; i < steps.size(); i++)

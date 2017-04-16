@@ -1,14 +1,15 @@
 #pragma once
 
+#include "glm/glm.hpp"
+
 class view
 {
 public:
 	view();
-	view(double x1, double y1, double x2, double y2);
+	view(double x1, double y1, double w, double h);
 	
 	void Zoom(double scale);
 	void Translate(double x, double y);
-
 	void SetCenter(double x, double y);
 
 	double GetX();
@@ -16,13 +17,9 @@ public:
 	double GetWidth();
 	double GetHeight();
 
-	double GetX1();
-	double GetY1();
-	double GetX2();
-	double GetY2();
+	void SetWidth(double width);
+	void SetHeight(double height);
 	
-	double GetCenterX();
-	double GetCenterY();
 private:
-	double _x1, _y1, _x2, _y2;
+	glm::dvec4 region;
 };

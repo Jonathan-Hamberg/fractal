@@ -35,7 +35,7 @@ int main(int argv, char *argc[])
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create the glfw window.
-    GLFWwindow *window = glfwCreateWindow(640, 480, "Fractal", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(640, 640, "Fractal", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		std::cout << "ERROR:INITIALIZATION:GLFW" << std::endl;
@@ -54,6 +54,9 @@ int main(int argv, char *argc[])
 		std::cout << "ERROR:INITIALIZATION:GLAD" << std::endl;
 		return 1;
 	}
+
+	// Set up VSync
+	glfwSwapInterval(1);
 
     ImGui_ImplGlfwGL3_Init(window, true);
 
